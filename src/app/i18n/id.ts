@@ -83,8 +83,11 @@ const id = {
   menu_m8_4c: 'Tetapkan Peran',
   menu_m8_4d: 'Reset Kata Sandi',
   menu_m8_4e: 'Log Aktivitas Pengguna',
-  menu_m8_5: 'Integrasi Sistem & Monitoring',
-  menu_m8_6: 'Audit Log Sistem',
+  menu_m8_5: 'Manajemen Role',
+  menu_m8_6: 'Manajemen Menu',
+  menu_m8_7: 'Ganti Password',
+  menu_m8_8: 'Integrasi Sistem & Monitoring',
+  menu_m8_9: 'Audit Log Sistem',
 
   // Login
   login_title: 'Login',

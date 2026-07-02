@@ -83,8 +83,11 @@ const en = {
   menu_m8_4c: 'Assign Role',
   menu_m8_4d: 'Reset Password',
   menu_m8_4e: 'User Activity Log',
-  menu_m8_5: 'System Integration & Monitoring',
-  menu_m8_6: 'System Audit Log',
+  menu_m8_5: 'Role Management',
+  menu_m8_6: 'Menu Management',
+  menu_m8_7: 'Change Password',
+  menu_m8_8: 'System Integration & Monitoring',
+  menu_m8_9: 'System Audit Log',
 
   // Login
   login_title: 'Login',

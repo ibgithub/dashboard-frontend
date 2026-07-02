@@ -140,8 +140,11 @@ const menuStructure: MenuItem[] = [
       { key: 'menu_m8_2', path: '/settings/batch-processing' },
       { key: 'menu_m8_3', path: '/settings/product-config' },
       { key: 'menu_m8_4', path: '/settings/user-management' },
-      { key: 'menu_m8_5', path: '/settings/integration-monitoring' },
-      { key: 'menu_m8_6', path: '/settings/audit-log' },
+      { key: 'menu_m8_5', path: '/settings/role-management' },
+      { key: 'menu_m8_6', path: '/settings/menu-management' },
+      { key: 'menu_m8_7', path: '/settings/change-password' },
+      { key: 'menu_m8_8', path: '/settings/integration-monitoring' },
+      { key: 'menu_m8_9', path: '/settings/audit-log' },
     ],
   },
 ];
