@@ -6,6 +6,8 @@ import { PlaceholderPage } from './pages/PlaceholderPage';
 import { ExecutivePortfolio } from './pages/ExecutivePortfolio';
 import { ClusterMap } from './pages/ClusterMap';
 import { ChurnWatchlist } from './pages/ChurnWatchlist';
+import { RoleManagement } from './pages/RoleManagement';
+import { RoleManagement } from './pages/RoleManagement';
 
 // Simple auth guard
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -90,7 +92,7 @@ const router = createBrowserRouter([
       { path: 'settings/batch-processing', element: <PlaceholderPage menuKey="menu_m8_2" /> },
       { path: 'settings/product-config', element: <PlaceholderPage menuKey="menu_m8_3" /> },
       { path: 'settings/user-management', element: <PlaceholderPage menuKey="menu_m8_4" /> },
-      { path: 'settings/role-management', element: <PlaceholderPage menuKey="menu_m8_5" /> },
+      { path: 'settings/role-management', element: <RoleManagement /> },
       { path: 'settings/menu-management', element: <PlaceholderPage menuKey="menu_m8_6" /> },
       { path: 'settings/change-password', element: <PlaceholderPage menuKey="menu_m8_7" /> },
       { path: 'settings/integration-monitoring', element: <PlaceholderPage menuKey="menu_m8_8" /> },
