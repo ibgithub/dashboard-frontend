@@ -32,7 +32,11 @@ export function Login() {
       }
 
       const data = await res.json();
-      const token = data.token || 'authenticated';
+      if (!data.success) {
+        throw new Error(data.message || 'Login gagal');
+      }
+      const token = data.data?.token || '';
+      if (!token) throw new Error('Token tidak ditemukan');
       localStorage.setItem('auth_token', token);
       localStorage.setItem('auth_user', username);
 
@@ -42,7 +46,8 @@ export function Login() {
       });
 
       if (menuRes.ok) {
-        const menus = await menuRes.json();
+        const menuData = await menuRes.json();
+        const menus = menuData.data || [];
         localStorage.setItem('auth_menus', JSON.stringify(menus));
       }
 
