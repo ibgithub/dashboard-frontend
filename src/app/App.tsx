@@ -3,6 +3,9 @@ import { DashboardLayout } from './components/DashboardLayout';
 import { Login } from './pages/Login';
 import { I18nProvider } from './i18n/I18nProvider';
 import { PlaceholderPage } from './pages/PlaceholderPage';
+import { ExecutivePortfolio } from './pages/ExecutivePortfolio';
+import { ClusterMap } from './pages/ClusterMap';
+import { ChurnWatchlist } from './pages/ChurnWatchlist';
 
 // Simple auth guard
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -30,21 +33,21 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="/executive/portfolio" replace /> },
 
       // M1: Executive Dashboard
-      { path: 'executive/portfolio', element: <PlaceholderPage menuKey="menu_m1_1" /> },
+      { path: 'executive/portfolio', element: <ExecutivePortfolio /> },
       { path: 'executive/churn-distribution', element: <PlaceholderPage menuKey="menu_m1_2" /> },
       { path: 'executive/segmentation-summary', element: <PlaceholderPage menuKey="menu_m1_3" /> },
       { path: 'executive/top-products', element: <PlaceholderPage menuKey="menu_m1_4" /> },
       { path: 'executive/priority-alerts', element: <PlaceholderPage menuKey="menu_m1_5" /> },
 
       // M2: Customer Segmentation
-      { path: 'segmentation/cluster-map', element: <PlaceholderPage menuKey="menu_m2_1" /> },
+      { path: 'segmentation/cluster-map', element: <ClusterMap /> },
       { path: 'segmentation/persona', element: <PlaceholderPage menuKey="menu_m2_2" /> },
       { path: 'segmentation/characteristics', element: <PlaceholderPage menuKey="menu_m2_3" /> },
       { path: 'segmentation/member-list', element: <PlaceholderPage menuKey="menu_m2_4" /> },
       { path: 'segmentation/migration-trend', element: <PlaceholderPage menuKey="menu_m2_5" /> },
 
       // M3: Churn Prediction
-      { path: 'churn/watchlist', element: <PlaceholderPage menuKey="menu_m3_1" /> },
+      { path: 'churn/watchlist', element: <ChurnWatchlist /> },
       { path: 'churn/score-distribution', element: <PlaceholderPage menuKey="menu_m3_2" /> },
       { path: 'churn/worsening-score', element: <PlaceholderPage menuKey="menu_m3_3" /> },
       { path: 'churn/driver-detail', element: <PlaceholderPage menuKey="menu_m3_4" /> },

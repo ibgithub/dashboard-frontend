@@ -115,11 +115,11 @@ export function DashboardLayout() {
   }
 
   return (
-    <div className="flex h-screen bg-slate-50">
-      {/* Sidebar — scrollable */}
-      <aside className={`${isCollapsed ? 'w-20' : 'w-72'} bg-white border-r border-slate-200 overflow-y-auto transition-all duration-300`}>
+    <div className="flex h-screen bg-slate-100">
+      {/* Sidebar — dark navy */}
+      <aside className={`${isCollapsed ? 'w-20' : 'w-72'} bg-[#0f172a] overflow-y-auto transition-all duration-300`}>
         {/* Header */}
-        <div className="p-4 border-b border-slate-200">
+        <div className="p-4 border-b border-slate-700/50">
           <div className="flex items-center justify-between">
             {isCollapsed ? (
               <div className="w-full">
@@ -129,16 +129,16 @@ export function DashboardLayout() {
               <div className="flex items-center gap-3">
                 <img src={logoImage} alt="Logo" className="w-10 h-10" />
                 <div>
-                  <h1 className="text-lg font-bold text-slate-900">{t.appName}</h1>
-                  <p className="text-xs text-slate-500">{t.appTagline}</p>
+                  <h1 className="text-lg font-bold text-white">{t.appName}</h1>
+                  <p className="text-xs text-slate-400">{t.appTagline}</p>
                 </div>
               </div>
             )}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors"
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-700 transition-colors"
             >
-              {isCollapsed ? <X className="w-5 h-5 text-slate-600" /> : <Menu className="w-5 h-5 text-slate-600" />}
+              {isCollapsed ? <X className="w-5 h-5 text-slate-300" /> : <Menu className="w-5 h-5 text-slate-300" />}
             </button>
           </div>
         </div>
@@ -147,7 +147,7 @@ export function DashboardLayout() {
         <div className="px-3 pt-3 pb-1 flex items-center gap-2">
           <button
             onClick={() => setLang('id')}
-            className={`px-2 py-1 rounded-md transition-all ${lang === 'id' ? 'bg-slate-200' : 'hover:bg-slate-100'}`}
+            className={`px-2 py-1 rounded-md transition-all ${lang === 'id' ? 'bg-slate-700' : 'hover:bg-slate-800'}`}
             title="Bahasa Indonesia"
           >
             <svg width="24" height="16" viewBox="0 0 24 16" className="rounded-sm">
@@ -157,7 +157,7 @@ export function DashboardLayout() {
           </button>
           <button
             onClick={() => setLang('en')}
-            className={`px-2 py-1 rounded-md transition-all ${lang === 'en' ? 'bg-slate-200' : 'hover:bg-slate-100'}`}
+            className={`px-2 py-1 rounded-md transition-all ${lang === 'en' ? 'bg-slate-700' : 'hover:bg-slate-800'}`}
             title="English"
           >
             <svg width="24" height="16" viewBox="0 0 60 30" className="rounded-sm">
@@ -197,8 +197,8 @@ export function DashboardLayout() {
                     className={`
                       w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-lg transition-all text-sm
                       ${isActive
-                        ? 'bg-[#8B1A1A]/10 text-[#8B1A1A] font-medium'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-blue-600/20 text-blue-300 font-medium'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                       }
                     `}
                     title={isCollapsed ? label : ''}
@@ -219,7 +219,7 @@ export function DashboardLayout() {
                   {/* Sub menus with accordion animation */}
                   {!isCollapsed && (
                     <div
-                      className="ml-6 border-l-2 border-slate-200 pl-3 overflow-hidden transition-all duration-300 ease-in-out"
+                      className="ml-6 border-l border-slate-700 pl-3 overflow-hidden transition-all duration-300 ease-in-out"
                       style={{
                         maxHeight: isExpanded ? `${menu.children.length * 44}px` : '0px',
                         opacity: isExpanded ? 1 : 0,
@@ -238,8 +238,8 @@ export function DashboardLayout() {
                               className={`
                                 block px-3 py-2 rounded-md text-sm transition-all
                                 ${isChildActive
-                                  ? 'bg-[#8B1A1A]/10 text-[#8B1A1A] font-medium'
-                                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                                  ? 'bg-blue-600/30 text-blue-200 font-medium'
+                                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                                 }
                               `}
                             >
@@ -261,7 +261,7 @@ export function DashboardLayout() {
           {!isCollapsed ? (
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-all"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-900/30 transition-all"
             >
               <LogOut className="w-5 h-5" />
               <span>{t.logout}</span>
@@ -269,7 +269,7 @@ export function DashboardLayout() {
           ) : (
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center p-2.5 rounded-lg text-red-600 hover:bg-red-50"
+              className="w-full flex items-center justify-center p-2.5 rounded-lg text-red-400 hover:bg-red-900/30"
               title={t.logout}
             >
               <LogOut className="w-5 h-5" />
