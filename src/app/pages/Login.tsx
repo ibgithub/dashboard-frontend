@@ -16,6 +16,7 @@ export function Login() {
     setLoading(true);
 
     try {
+      // Step 1: Login
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -28,9 +29,21 @@ export function Login() {
       }
 
       const data = await res.json();
-      localStorage.setItem('auth_token', data.token || 'authenticated');
+      const token = data.token || 'authenticated';
+      localStorage.setItem('auth_token', token);
       localStorage.setItem('auth_user', username);
 
+      // Step 2: Fetch menu permissions
+      const menuRes = await fetch('/api/users/me/menus', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (menuRes.ok) {
+        const menus = await menuRes.json();
+        localStorage.setItem('auth_menus', JSON.stringify(menus));
+      }
+
+      // Redirect ke dashboard
       navigate('/', { replace: true });
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan saat login');

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import {
   LayoutDashboard,
@@ -14,162 +14,109 @@ import {
   ChevronDown,
   ChevronRight,
   LogOut,
+  FileText,
+  type LucideIcon,
 } from 'lucide-react';
 import { useI18n } from '../i18n';
 
 // Logo placeholder
 const logoImage = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#155DFC"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="white">A</text></svg>');
 
-interface SubMenuItem {
-  key: string;
-  path: string;
+// Map icon string from API to Lucide component
+const iconMap: Record<string, LucideIcon> = {
+  LayoutDashboard,
+  Users,
+  TrendingDown,
+  DollarSign,
+  ShoppingBag,
+  UserCircle,
+  BarChart3,
+  Settings,
+  FileText,
+};
+
+function getIcon(iconName: string | null): LucideIcon {
+  if (!iconName) return FileText;
+  return iconMap[iconName] || FileText;
 }
 
-interface MenuItem {
+// Types matching API response
+interface ApiMenu {
+  id: number;
+  code: string;
+  parentCode: string | null;
+  menuKey: string;
+  path: string;
+  icon: string | null;
+  sortOrder: number;
+  children: ApiMenu[] | null;
+}
+
+interface DisplayMenu {
   key: string;
   code: string;
-  icon: any;
+  icon: LucideIcon;
   path: string;
-  children: SubMenuItem[];
+  children: { key: string; path: string }[];
 }
 
-// Menu structure definition (keys reference i18n resource)
-const menuStructure: MenuItem[] = [
-  {
-    key: 'menu_m1',
-    code: 'M1',
-    icon: LayoutDashboard,
-    path: '/executive',
-    children: [
-      { key: 'menu_m1_1', path: '/executive/portfolio' },
-      { key: 'menu_m1_2', path: '/executive/churn-distribution' },
-      { key: 'menu_m1_3', path: '/executive/segmentation-summary' },
-      { key: 'menu_m1_4', path: '/executive/top-products' },
-      { key: 'menu_m1_5', path: '/executive/priority-alerts' },
-    ],
-  },
-  {
-    key: 'menu_m2',
-    code: 'M2',
-    icon: Users,
-    path: '/segmentation',
-    children: [
-      { key: 'menu_m2_1', path: '/segmentation/cluster-map' },
-      { key: 'menu_m2_2', path: '/segmentation/persona' },
-      { key: 'menu_m2_3', path: '/segmentation/characteristics' },
-      { key: 'menu_m2_4', path: '/segmentation/member-list' },
-      { key: 'menu_m2_5', path: '/segmentation/migration-trend' },
-    ],
-  },
-  {
-    key: 'menu_m3',
-    code: 'M3',
-    icon: TrendingDown,
-    path: '/churn',
-    children: [
-      { key: 'menu_m3_1', path: '/churn/watchlist' },
-      { key: 'menu_m3_2', path: '/churn/score-distribution' },
-      { key: 'menu_m3_3', path: '/churn/worsening-score' },
-      { key: 'menu_m3_4', path: '/churn/driver-detail' },
-      { key: 'menu_m3_5', path: '/churn/action-history' },
-    ],
-  },
-  {
-    key: 'menu_m4',
-    code: 'M4',
-    icon: DollarSign,
-    path: '/profitability',
-    children: [
-      { key: 'menu_m4_1', path: '/profitability/ranking' },
-      { key: 'menu_m4_2', path: '/profitability/priority-matrix' },
-      { key: 'menu_m4_3', path: '/profitability/persona-group' },
-      { key: 'menu_m4_4', path: '/profitability/breakdown' },
-      { key: 'menu_m4_5', path: '/profitability/trend' },
-      { key: 'menu_m4_6', path: '/profitability/clv' },
-    ],
-  },
-  {
-    key: 'menu_m5',
-    code: 'M5',
-    icon: ShoppingBag,
-    path: '/recommendation',
-    children: [
-      { key: 'menu_m5_1', path: '/recommendation/list' },
-      { key: 'menu_m5_2', path: '/recommendation/status' },
-      { key: 'menu_m5_3', path: '/recommendation/cold-start' },
-      { key: 'menu_m5_4', path: '/recommendation/performance' },
-      { key: 'menu_m5_5', path: '/recommendation/product-config' },
-    ],
-  },
-  {
-    key: 'menu_m6',
-    code: 'M6',
-    icon: UserCircle,
-    path: '/customer-profile',
-    children: [
-      { key: 'menu_m6_1', path: '/customer-profile/overview' },
-      { key: 'menu_m6_2', path: '/customer-profile/cluster-persona' },
-      { key: 'menu_m6_3', path: '/customer-profile/churn-score' },
-      { key: 'menu_m6_4', path: '/customer-profile/profitability-clv' },
-      { key: 'menu_m6_5', path: '/customer-profile/retention-priority' },
-      { key: 'menu_m6_6', path: '/customer-profile/active-recommendations' },
-      { key: 'menu_m6_7', path: '/customer-profile/credit-score' },
-      { key: 'menu_m6_8', path: '/customer-profile/rm-interaction' },
-    ],
-  },
-  {
-    key: 'menu_m7',
-    code: 'M7',
-    icon: BarChart3,
-    path: '/reports',
-    children: [
-      { key: 'menu_m7_1', path: '/reports/segmentation' },
-      { key: 'menu_m7_2', path: '/reports/churn-retention' },
-      { key: 'menu_m7_3', path: '/reports/profitability' },
-      { key: 'menu_m7_4', path: '/reports/recommendation-effectiveness' },
-      { key: 'menu_m7_5', path: '/reports/export' },
-    ],
-  },
-  {
-    key: 'menu_m8',
-    code: 'M8',
-    icon: Settings,
-    path: '/settings',
-    children: [
-      { key: 'menu_m8_1', path: '/settings/model-parameters' },
-      { key: 'menu_m8_2', path: '/settings/batch-processing' },
-      { key: 'menu_m8_3', path: '/settings/product-config' },
-      { key: 'menu_m8_4', path: '/settings/user-management' },
-      { key: 'menu_m8_5', path: '/settings/role-management' },
-      { key: 'menu_m8_6', path: '/settings/menu-management' },
-      { key: 'menu_m8_7', path: '/settings/change-password' },
-      { key: 'menu_m8_8', path: '/settings/integration-monitoring' },
-      { key: 'menu_m8_9', path: '/settings/audit-log' },
-    ],
-  },
-];
+// Convert API menu response to display format
+function buildMenuFromApi(apiMenus: ApiMenu[]): DisplayMenu[] {
+  return apiMenus
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((menu) => ({
+      key: menu.menuKey,
+      code: menu.code,
+      icon: getIcon(menu.icon),
+      path: menu.path,
+      children: (menu.children || [])
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((child) => ({
+          key: child.menuKey,
+          path: child.path,
+        })),
+    }));
+}
 
 export function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { lang, t, setLang } = useI18n();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [expandedMenu, setExpandedMenu] = useState<string | null>('menu_m1');
+  const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
+
+  // Load menu from localStorage (saved after login)
+  const menuStructure = useMemo<DisplayMenu[]>(() => {
+    try {
+      const stored = localStorage.getItem('auth_menus');
+      if (stored) {
+        const apiMenus: ApiMenu[] = JSON.parse(stored);
+        const menus = buildMenuFromApi(apiMenus);
+        return menus;
+      }
+    } catch (e) {
+      // fallback: empty
+    }
+    return [];
+  }, []);
+
+  // Auto-expand first menu if none expanded
+  const effectiveExpanded = expandedMenu ?? (menuStructure.length > 0 ? menuStructure[0].key : null);
 
   function toggleMenu(key: string) {
-    // Accordion: hanya satu menu terbuka, klik lagi untuk tutup
     setExpandedMenu((prev) => (prev === key ? null : key));
   }
 
   function handleLogout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
+    localStorage.removeItem('auth_menus');
     navigate('/login', { replace: true });
   }
 
   return (
     <div className="flex h-screen bg-slate-50">
-      {/* Sidebar — scrollable, no fixed footer */}
+      {/* Sidebar — scrollable */}
       <aside className={`${isCollapsed ? 'w-20' : 'w-72'} bg-white border-r border-slate-200 overflow-y-auto transition-all duration-300`}>
         {/* Header */}
         <div className="p-4 border-b border-slate-200">
@@ -231,7 +178,7 @@ export function DashboardLayout() {
           <div className="space-y-1">
             {menuStructure.map((menu) => {
               const Icon = menu.icon;
-              const isExpanded = expandedMenu === menu.key;
+              const isExpanded = effectiveExpanded === menu.key;
               const isActive = isExpanded;
               const label = (t as any)[menu.key] || menu.key;
 
@@ -284,22 +231,22 @@ export function DashboardLayout() {
                           const childLabel = (t as any)[child.key] || child.key;
                           const isChildActive = location.pathname === child.path;
 
-                        return (
-                          <Link
-                            key={child.key}
-                            to={child.path}
-                            className={`
-                              block px-3 py-2 rounded-md text-sm transition-all
-                              ${isChildActive
-                                ? 'bg-[#8B1A1A]/10 text-[#8B1A1A] font-medium'
-                                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
-                              }
-                            `}
-                          >
-                            {childLabel}
-                          </Link>
-                        );
-                      })}
+                          return (
+                            <Link
+                              key={child.key}
+                              to={child.path}
+                              className={`
+                                block px-3 py-2 rounded-md text-sm transition-all
+                                ${isChildActive
+                                  ? 'bg-[#8B1A1A]/10 text-[#8B1A1A] font-medium'
+                                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                                }
+                              `}
+                            >
+                              {childLabel}
+                            </Link>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
