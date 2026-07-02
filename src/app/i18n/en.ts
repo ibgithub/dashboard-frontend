@@ -89,6 +89,25 @@ const en = {
   menu_m8_8: 'System Integration & Monitoring',
   menu_m8_9: 'System Audit Log',
 
+  // Role Management
+  role_title: 'Role Management',
+  role_subtitle: 'List of roles available in the system',
+  role_name: 'Role Name',
+  role_description: 'Description',
+  role_actions: 'Actions',
+  role_add: 'Add Role',
+  role_detail: 'Role Detail',
+  role_edit: 'Edit Role',
+  role_delete_confirm: 'Are you sure you want to delete this role?',
+  role_loading: 'Loading roles...',
+  role_access_denied: 'Access denied. You do not have permission to view roles.',
+  role_session_expired: 'Session expired. Please login again.',
+  role_save: 'Save',
+  role_cancel: 'Cancel',
+  role_close: 'Close',
+  role_delete: 'Delete',
+  role_confirm_delete: 'Confirm Delete',
+
   // Login
   login_title: 'Login',
   login_subtitle: 'Sign in to ANVAIA Dashboard',

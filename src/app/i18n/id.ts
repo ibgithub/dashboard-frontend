@@ -89,6 +89,25 @@ const id = {
   menu_m8_8: 'Integrasi Sistem & Monitoring',
   menu_m8_9: 'Audit Log Sistem',
 
+  // Role Management
+  role_title: 'Manajemen Role',
+  role_subtitle: 'Daftar role yang tersedia dalam sistem',
+  role_name: 'Nama Role',
+  role_description: 'Deskripsi',
+  role_actions: 'Aksi',
+  role_add: 'Tambah Role',
+  role_detail: 'Detail Role',
+  role_edit: 'Edit Role',
+  role_delete_confirm: 'Yakin ingin menghapus role ini?',
+  role_loading: 'Memuat data role...',
+  role_access_denied: 'Akses ditolak. Anda tidak memiliki izin untuk melihat data role.',
+  role_session_expired: 'Sesi telah berakhir. Silakan login kembali.',
+  role_save: 'Simpan',
+  role_cancel: 'Batal',
+  role_close: 'Tutup',
+  role_delete: 'Hapus',
+  role_confirm_delete: 'Konfirmasi Hapus',
+
   // Login
   login_title: 'Login',
   login_subtitle: 'Masuk ke Dashboard ANVAIA',
