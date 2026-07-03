@@ -1,8 +1,7 @@
 // Halaman: Role Management (M8.5)
-// CRUD role dengan slide panel dari kanan
 
 import { useState, useEffect } from 'react';
-import { Shield, Eye, Pencil, Trash2, Plus, X } from 'lucide-react';
+import { Eye, Pencil, Trash2, Plus, X, Search } from 'lucide-react';
 import { useI18n } from '../i18n';
 
 interface Role {
@@ -11,292 +10,239 @@ interface Role {
   description: string;
 }
 
-type DrawerMode = 'detail' | 'add' | 'edit' | null;
+interface PageData {
+  content: Role[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+type ModalMode = 'detail' | 'add' | 'edit' | null;
 
 export function RoleManagement() {
   const { t } = useI18n();
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [pageData, setPageData] = useState<PageData>({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [keyword, setKeyword] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
-  // Drawer state
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<DrawerMode>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-
-  // Form state (for add/edit)
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
 
-  function getToken() {
-    return localStorage.getItem('auth_token') || '';
-  }
+  function getToken() { return localStorage.getItem('auth_token') || ''; }
 
-  // Fetch daftar role
-  async function fetchRoles() {
+  async function fetchRoles(page = 0, size = 10, search = '') {
+    setLoading(true);
     try {
-      const res = await fetch('/api/roles', {
-        headers: { 'Authorization': `Bearer ${getToken()}` },
-      });
+      let url = `/api/roles?page=${page}&size=${size}`;
+      if (search) url += `&keyword=${encodeURIComponent(search)}`;
+      const res = await fetch(url, { headers: { 'Authorization': `Bearer ${getToken()}` } });
       if (res.status === 403) { setError((t as any).role_access_denied); return; }
       if (res.status === 401) { setError((t as any).role_session_expired); return; }
       const json = await res.json();
-      if (json.success) setRoles(json.data);
+      if (json.success) { setPageData(json.data); setError(''); }
       else setError(json.message || 'Error');
-    } catch (err: any) {
-      setError(err.message || 'Error');
-    } finally {
-      setLoading(false);
-    }
+    } catch (err: any) { setError(err.message || 'Error'); }
+    finally { setLoading(false); }
   }
 
-  useEffect(() => { fetchRoles(); }, []);
+  useEffect(() => { fetchRoles(currentPage, pageSize, keyword); }, [currentPage, pageSize]);
 
-  // Open drawer
-  function openDetail(role: Role) {
-    setSelectedRole(role);
-    setDrawerMode('detail');
-    setDrawerOpen(true);
+  function handleSearch() { setCurrentPage(0); fetchRoles(0, pageSize, keyword); }
+  function handleKeyDown(e: React.KeyboardEvent) { if (e.key === 'Enter') handleSearch(); }
+  function handlePageSizeChange(newSize: number) { setPageSize(newSize); setCurrentPage(0); }
+
+  function getPageNumbers(): number[] {
+    const total = pageData.totalPages;
+    if (total <= 5) return Array.from({ length: total }, (_, i) => i);
+    let start = Math.max(0, currentPage - 2);
+    let end = start + 5;
+    if (end > total) { end = total; start = end - 5; }
+    return Array.from({ length: end - start }, (_, i) => start + i);
   }
 
-  function openEdit(role: Role) {
-    setSelectedRole(role);
-    setFormName(role.roleName);
-    setFormDescription(role.description);
-    setDrawerMode('edit');
-    setDrawerOpen(true);
-  }
+  function openDetail(role: Role) { setSelectedRole(role); setModalMode('detail'); setModalOpen(true); }
+  function openEdit(role: Role) { setSelectedRole(role); setFormName(role.roleName); setFormDescription(role.description); setModalMode('edit'); setModalOpen(true); }
+  function openAdd() { setSelectedRole(null); setFormName(''); setFormDescription(''); setModalMode('add'); setModalOpen(true); }
+  function closeModal() { setModalOpen(false); setModalMode(null); setSelectedRole(null); }
 
-  function openAdd() {
-    setSelectedRole(null);
-    setFormName('');
-    setFormDescription('');
-    setDrawerMode('add');
-    setDrawerOpen(true);
-  }
-
-  function closeDrawer() {
-    setDrawerOpen(false);
-    setTimeout(() => { setDrawerMode(null); setSelectedRole(null); }, 300);
-  }
-
-  // Save (add or edit)
   async function handleSave() {
-    const url = drawerMode === 'add' ? '/api/roles' : `/api/roles/${selectedRole?.id}`;
-    const method = drawerMode === 'add' ? 'POST' : 'PUT';
+    const url = modalMode === 'add' ? '/api/roles' : `/api/roles/${selectedRole?.id}`;
+    const method = modalMode === 'add' ? 'POST' : 'PUT';
     try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ roleName: formName, description: formDescription }),
-      });
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }, body: JSON.stringify({ roleName: formName, description: formDescription }) });
       const json = await res.json();
-      if (json.success) {
-        closeDrawer();
-        fetchRoles();
-      }
-    } catch (err) {
-      // silent
-    }
+      if (json.success) { closeModal(); fetchRoles(currentPage, pageSize, keyword); }
+    } catch (err) {}
   }
 
-  // Delete
   async function handleDelete(role: Role) {
     if (!confirm((t as any).role_delete_confirm)) return;
-    try {
-      await fetch(`/api/roles/${role.id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${getToken()}` },
-      });
-      fetchRoles();
-    } catch (err) {
-      // silent
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="p-6 flex items-center justify-center h-64">
-        <p className="text-slate-500">{(t as any).role_loading}</p>
-      </div>
-    );
+    try { await fetch(`/api/roles/${role.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getToken()}` } }); fetchRoles(currentPage, pageSize, keyword); } catch (err) {}
   }
 
   if (error) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>
-      </div>
-    );
+    return (<div className="p-5"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-xs">{error}</div></div>);
   }
 
   return (
-    <div className="p-6 space-y-6 relative">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{(t as any).role_title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{(t as any).role_subtitle}</p>
+    <div className="p-5 flex flex-col min-h-full">
+      {/* Title & subtitle */}
+      <div className="mb-1">
+        <h1 className="text-lg font-semibold text-slate-800">{(t as any).role_title}</h1>
+        <p className="text-xs text-slate-500">{(t as any).role_subtitle}</p>
+      </div>
+
+      {/* Search kiri, Add Role kanan */}
+      <div className="flex items-center justify-between mb-4 mt-3">
+        <div className="flex items-stretch">
+          <input
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={(t as any).role_search}
+            className="px-3 py-1.5 border border-slate-300 border-r-0 rounded-l text-xs focus:outline-none focus:border-slate-400 bg-white w-48 h-8"
+          />
+          <button
+            onClick={handleSearch}
+            className="px-2.5 bg-slate-600 hover:bg-slate-700 text-white rounded-r border border-slate-600 flex items-center justify-center h-8"
+          >
+            <Search className="w-3.5 h-3.5" />
+          </button>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-sm"
+          className="flex items-center gap-1.5 px-3 h-8 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           {(t as any).role_add}
         </button>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="text-left py-3 px-4 font-medium text-slate-600">{(t as any).role_name}</th>
-              <th className="text-left py-3 px-4 font-medium text-slate-600">{(t as any).role_description}</th>
-              <th className="text-center py-3 px-4 font-medium text-slate-600 w-32">{(t as any).role_actions}</th>
+      <div className="bg-white border border-slate-200 rounded overflow-hidden flex-1">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50">
+              <th className="text-left py-2.5 px-4 font-semibold text-slate-500 uppercase tracking-wide">{(t as any).role_name}</th>
+              <th className="text-left py-2.5 px-4 font-semibold text-slate-500 uppercase tracking-wide">{(t as any).role_description}</th>
+              <th className="text-center py-2.5 px-4 font-semibold text-slate-500 uppercase tracking-wide w-24">{(t as any).role_actions}</th>
             </tr>
           </thead>
           <tbody>
-            {roles.map((role) => (
-              <tr key={role.id} className="border-b border-slate-100 hover:bg-slate-50">
-                <td className="py-3 px-4">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-blue-500" />
-                    <span className="font-medium text-slate-900">{role.roleName}</span>
-                  </div>
-                </td>
-                <td className="py-3 px-4 text-slate-600">{role.description}</td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center justify-center gap-1">
-                    <button
-                      onClick={() => openDetail(role)}
-                      className="p-1.5 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition"
-                      title={(t as any).role_detail}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => openEdit(role)}
-                      className="p-1.5 rounded-md text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition"
-                      title={(t as any).role_edit}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(role)}
-                      className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
-                      title={(t as any).role_delete}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {loading ? (
+              <tr><td colSpan={3} className="py-6 text-center text-slate-400 text-xs">{(t as any).role_loading}</td></tr>
+            ) : pageData.content.length === 0 ? (
+              <tr><td colSpan={3} className="py-6 text-center text-slate-400 text-xs">No data</td></tr>
+            ) : (
+              pageData.content.map((role) => (
+                <tr key={role.id} className="border-b border-slate-100 hover:bg-slate-50/50">
+                  <td className="py-2 px-4 text-slate-800">{role.roleName}</td>
+                  <td className="py-2 px-4 text-slate-600">{role.description}</td>
+                  <td className="py-2 px-4">
+                    <div className="flex items-center justify-center gap-0.5">
+                      <button onClick={() => openDetail(role)} className="p-1 rounded text-blue-500 hover:bg-blue-50 transition" title={(t as any).role_detail}>
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => openEdit(role)} className="p-1 rounded text-amber-500 hover:bg-amber-50 transition" title={(t as any).role_edit}>
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => handleDelete(role)} className="p-1 rounded text-red-500 hover:bg-red-50 transition" title={(t as any).role_delete}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Backdrop */}
-      {drawerOpen && (
-        <div className="fixed inset-0 bg-black/30 z-40" onClick={closeDrawer}></div>
-      )}
-
-      {/* Slide panel (drawer from right) */}
-      <div
-        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
-          drawerOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        <div className="flex flex-col h-full">
-          {/* Drawer header */}
-          <div className="flex items-center justify-between p-5 border-b border-slate-200">
-            <h2 className="text-lg font-semibold text-slate-900">
-              {drawerMode === 'detail' && (t as any).role_detail}
-              {drawerMode === 'add' && (t as any).role_add}
-              {drawerMode === 'edit' && (t as any).role_edit}
-            </h2>
-            <button
-              onClick={closeDrawer}
-              className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Drawer body */}
-          <div className="flex-1 p-5 overflow-y-auto">
-            {drawerMode === 'detail' && selectedRole && (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm text-slate-500">{(t as any).role_name}</label>
-                  <p className="text-slate-900 font-medium mt-1">{selectedRole.roleName}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-slate-500">{(t as any).role_description}</label>
-                  <p className="text-slate-900 mt-1">{selectedRole.description}</p>
-                </div>
-              </div>
-            )}
-
-            {(drawerMode === 'add' || drawerMode === 'edit') && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">{(t as any).role_name}</label>
-                  <input
-                    type="text"
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50 focus:bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">{(t as any).role_description}</label>
-                  <textarea
-                    value={formDescription}
-                    onChange={(e) => setFormDescription(e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50 focus:bg-white resize-none"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Drawer footer */}
-          {(drawerMode === 'add' || drawerMode === 'edit') && (
-            <div className="p-5 border-t border-slate-200 flex gap-3">
-              <button
-                onClick={handleSave}
-                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
-              >
-                {(t as any).role_save}
-              </button>
-              <button
-                onClick={closeDrawer}
-                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition"
-              >
-                {(t as any).role_cancel}
-              </button>
-            </div>
-          )}
-
-          {drawerMode === 'detail' && (
-            <div className="p-5 border-t border-slate-200">
-              <button
-                onClick={closeDrawer}
-                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition"
-              >
-                {(t as any).role_close}
-              </button>
-            </div>
-          )}
-        </div>
+      {/* Paging */}
+      <div className="flex items-center mt-4 gap-2">
+        <button onClick={() => setCurrentPage(Math.max(0, currentPage - 1))} disabled={currentPage === 0}
+          className="px-1.5 py-0.5 text-xs border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">«</button>
+        {getPageNumbers().map((page) => (
+          <button key={page} onClick={() => setCurrentPage(page)}
+            className={`px-2 py-0.5 text-xs rounded transition ${page === currentPage ? 'bg-slate-700 text-white' : 'border border-slate-300 hover:bg-slate-50 text-slate-600'}`}
+          >{page + 1}</button>
+        ))}
+        <button onClick={() => setCurrentPage(Math.min(pageData.totalPages - 1, currentPage + 1))} disabled={currentPage >= pageData.totalPages - 1}
+          className="px-1.5 py-0.5 text-xs border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">»</button>
+        <select value={pageSize} onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+          className="ml-3 px-1.5 py-0.5 text-xs border border-slate-300 rounded bg-white">
+          <option value={5}>5 / Page</option>
+          <option value={10}>10 / Page</option>
+          <option value={25}>25 / Page</option>
+          <option value={50}>50 / Page</option>
+        </select>
+        <span className="ml-3 text-xs text-slate-500">Total {pageData.totalElements} Data</span>
       </div>
+
+      {/* Footer */}
+      <div className="mt-6 pt-3 border-t border-slate-200 text-center text-xs text-slate-400">
+        © 2026 <span className="font-semibold text-slate-500">ANVAIA</span> — Customer Intelligence Platform
+      </div>
+
+      {/* Modal popup */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={closeModal}></div>
+          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <h2 className="text-sm font-semibold text-slate-900">
+                {modalMode === 'detail' && (t as any).role_detail}
+                {modalMode === 'add' && (t as any).role_add}
+                {modalMode === 'edit' && (t as any).role_edit}
+              </h2>
+              <button onClick={closeModal} className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4">
+              {modalMode === 'detail' && selectedRole && (
+                <div className="space-y-3">
+                  <div><label className="text-xs text-slate-500">{(t as any).role_name}</label><p className="text-sm text-slate-900 font-medium mt-0.5">{selectedRole.roleName}</p></div>
+                  <div><label className="text-xs text-slate-500">{(t as any).role_description}</label><p className="text-sm text-slate-900 mt-0.5">{selectedRole.description}</p></div>
+                </div>
+              )}
+              {(modalMode === 'add' || modalMode === 'edit') && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">{(t as any).role_name}</label>
+                    <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">{(t as any).role_description}</label>
+                    <textarea value={formDescription} onChange={(e) => setFormDescription(e.target.value)} rows={3}
+                      className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white resize-none" />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t border-slate-200 flex gap-2">
+              {(modalMode === 'add' || modalMode === 'edit') && (
+                <>
+                  <button onClick={handleSave} className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition">{(t as any).role_save}</button>
+                  <button onClick={closeModal} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded transition">{(t as any).role_cancel}</button>
+                </>
+              )}
+              {modalMode === 'detail' && (
+                <button onClick={closeModal} className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded transition">{(t as any).role_close}</button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

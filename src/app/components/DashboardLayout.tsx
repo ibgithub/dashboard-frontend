@@ -195,7 +195,7 @@ export function DashboardLayout() {
                       }
                     }}
                     className={`
-                      w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-lg transition-all text-sm
+                      w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2 rounded-lg transition-all text-[13px]
                       ${isActive
                         ? 'bg-blue-600/20 text-blue-300 font-medium'
                         : 'text-slate-300 hover:bg-slate-800 hover:text-white'
@@ -203,25 +203,25 @@ export function DashboardLayout() {
                     `}
                     title={isCollapsed ? label : ''}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className="w-5 h-5 flex-shrink-0" />
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4 flex-shrink-0" />
                       {!isCollapsed && (
                         <span className="truncate">{label}</span>
                       )}
                     </div>
                     {!isCollapsed && (
                       isExpanded
-                        ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
-                        : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+                        ? <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" />
+                        : <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
                     )}
                   </button>
 
                   {/* Sub menus with accordion animation */}
                   {!isCollapsed && (
                     <div
-                      className="ml-6 border-l border-slate-700 pl-3 overflow-hidden transition-all duration-300 ease-in-out"
+                      className="ml-5 border-l border-slate-700 pl-2.5 overflow-hidden transition-all duration-300 ease-in-out"
                       style={{
-                        maxHeight: isExpanded ? `${menu.children.length * 44}px` : '0px',
+                        maxHeight: isExpanded ? `${menu.children.length * 36}px` : '0px',
                         opacity: isExpanded ? 1 : 0,
                         marginTop: isExpanded ? '4px' : '0px',
                       }}
@@ -236,7 +236,7 @@ export function DashboardLayout() {
                               key={child.key}
                               to={child.path}
                               className={`
-                                block px-3 py-2 rounded-md text-sm transition-all
+                                block px-2.5 py-1.5 rounded-md text-[12px] transition-all
                                 ${isChildActive
                                   ? 'bg-blue-600/30 text-blue-200 font-medium'
                                   : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
@@ -261,9 +261,9 @@ export function DashboardLayout() {
           {!isCollapsed ? (
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-900/30 transition-all"
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-400 hover:bg-red-900/30 transition-all"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="w-4 h-4" />
               <span>{t.logout}</span>
             </button>
           ) : (

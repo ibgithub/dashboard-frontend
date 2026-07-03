@@ -107,6 +107,10 @@ const id = {
   role_close: 'Tutup',
   role_delete: 'Hapus',
   role_confirm_delete: 'Konfirmasi Hapus',
+  role_search: 'Cari role...',
+  role_page_info: 'Halaman {page} dari {total}',
+  role_prev: 'Sebelumnya',
+  role_next: 'Selanjutnya',
 
   // Login
   login_title: 'Login',

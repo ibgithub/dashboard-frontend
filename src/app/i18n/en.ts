@@ -107,6 +107,10 @@ const en = {
   role_close: 'Close',
   role_delete: 'Delete',
   role_confirm_delete: 'Confirm Delete',
+  role_search: 'Search roles...',
+  role_page_info: 'Page {page} of {total}',
+  role_prev: 'Previous',
+  role_next: 'Next',
 
   // Login
   login_title: 'Login',
