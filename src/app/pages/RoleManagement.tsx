@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, Pencil, Trash2, Plus, X, Search } from 'lucide-react';
 import { useI18n } from '../i18n';
+import { toast } from 'sonner';
 
 interface Role {
   id: number;
@@ -58,6 +59,9 @@ export function RoleManagement() {
   function handleKeyDown(e: React.KeyboardEvent) { if (e.key === 'Enter') handleSearch(); }
   function handlePageSizeChange(newSize: number) { setPageSize(newSize); setCurrentPage(0); }
 
+  // i18n helper for page size label
+  const pageLabel = (t as any).lang === 'id' ? 'Halaman' : 'Page';
+
   function getPageNumbers(): number[] {
     const total = pageData.totalPages;
     if (total <= 5) return Array.from({ length: total }, (_, i) => i);
@@ -78,13 +82,19 @@ export function RoleManagement() {
     try {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }, body: JSON.stringify({ roleName: formName, description: formDescription }) });
       const json = await res.json();
-      if (json.success) { closeModal(); fetchRoles(currentPage, pageSize, keyword); }
-    } catch (err) {}
+      if (json.success) { toast.success(json.message || 'Berhasil'); closeModal(); fetchRoles(currentPage, pageSize, keyword); }
+      else toast.error(json.message || 'Gagal menyimpan');
+    } catch (err: any) { toast.error(err.message || 'Error'); }
   }
 
   async function handleDelete(role: Role) {
     if (!confirm((t as any).role_delete_confirm)) return;
-    try { await fetch(`/api/roles/${role.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getToken()}` } }); fetchRoles(currentPage, pageSize, keyword); } catch (err) {}
+    try {
+      const res = await fetch(`/api/roles/${role.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getToken()}` } });
+      const json = await res.json();
+      if (json.success) { toast.success(json.message || 'Role berhasil dihapus'); fetchRoles(currentPage, pageSize, keyword); }
+      else toast.error(json.message || 'Gagal menghapus');
+    } catch (err: any) { toast.error(err.message || 'Error'); }
   }
 
   if (error) {
@@ -95,8 +105,8 @@ export function RoleManagement() {
     <div className="p-5 flex flex-col min-h-full">
       {/* Title & subtitle */}
       <div className="mb-1">
-        <h1 className="text-lg font-semibold text-slate-800">{(t as any).role_title}</h1>
-        <p className="text-xs text-slate-500">{(t as any).role_subtitle}</p>
+        <h1 className="text-xl font-bold text-slate-800">{(t as any).role_title}</h1>
+        <p className="text-sm text-slate-500">{(t as any).role_subtitle}</p>
       </div>
 
       {/* Search kiri, Add Role kanan */}
@@ -108,7 +118,7 @@ export function RoleManagement() {
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={(t as any).role_search}
-            className="px-3 py-1.5 border border-slate-300 border-r-0 rounded-l text-xs focus:outline-none focus:border-slate-400 bg-white w-48 h-8"
+            className="px-3 py-1.5 border border-slate-300 border-r-0 rounded-l text-xs focus:outline-none focus:border-slate-400 bg-white w-64 h-8"
           />
           <button
             onClick={handleSearch}
@@ -127,7 +137,7 @@ export function RoleManagement() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-slate-200 rounded overflow-hidden flex-1">
+      <div className="bg-white border border-slate-200 rounded overflow-hidden">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
@@ -143,18 +153,18 @@ export function RoleManagement() {
               <tr><td colSpan={3} className="py-6 text-center text-slate-400 text-xs">No data</td></tr>
             ) : (
               pageData.content.map((role) => (
-                <tr key={role.id} className="border-b border-slate-100 hover:bg-slate-50/50">
+                <tr key={role.id} className="border-b border-slate-100 hover:bg-blue-50/40">
                   <td className="py-2 px-4 text-slate-800">{role.roleName}</td>
                   <td className="py-2 px-4 text-slate-600">{role.description}</td>
                   <td className="py-2 px-4">
-                    <div className="flex items-center justify-center gap-0.5">
-                      <button onClick={() => openDetail(role)} className="p-1 rounded text-blue-500 hover:bg-blue-50 transition" title={(t as any).role_detail}>
+                    <div className="flex items-center justify-center gap-1">
+                      <button onClick={() => openDetail(role)} className="p-1.5 rounded-full border border-blue-200 text-blue-500 hover:bg-blue-100 transition" title={(t as any).role_detail}>
                         <Eye className="w-3.5 h-3.5" />
                       </button>
-                      <button onClick={() => openEdit(role)} className="p-1 rounded text-amber-500 hover:bg-amber-50 transition" title={(t as any).role_edit}>
+                      <button onClick={() => openEdit(role)} className="p-1.5 rounded-full border border-amber-200 text-amber-500 hover:bg-amber-100 transition" title={(t as any).role_edit}>
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
-                      <button onClick={() => handleDelete(role)} className="p-1 rounded text-red-500 hover:bg-red-50 transition" title={(t as any).role_delete}>
+                      <button onClick={() => handleDelete(role)} className="p-1.5 rounded-full border border-red-200 text-red-500 hover:bg-red-100 transition" title={(t as any).role_delete}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -169,20 +179,20 @@ export function RoleManagement() {
       {/* Paging */}
       <div className="flex items-center mt-4 gap-2">
         <button onClick={() => setCurrentPage(Math.max(0, currentPage - 1))} disabled={currentPage === 0}
-          className="px-1.5 py-0.5 text-xs border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">«</button>
+          className="px-2.5 py-1 text-xs border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">«</button>
         {getPageNumbers().map((page) => (
           <button key={page} onClick={() => setCurrentPage(page)}
-            className={`px-2 py-0.5 text-xs rounded transition ${page === currentPage ? 'bg-slate-700 text-white' : 'border border-slate-300 hover:bg-slate-50 text-slate-600'}`}
+            className={`px-3 py-1 text-xs rounded transition ${page === currentPage ? 'bg-slate-700 text-white' : 'border border-slate-300 hover:bg-slate-50 text-slate-600'}`}
           >{page + 1}</button>
         ))}
         <button onClick={() => setCurrentPage(Math.min(pageData.totalPages - 1, currentPage + 1))} disabled={currentPage >= pageData.totalPages - 1}
-          className="px-1.5 py-0.5 text-xs border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">»</button>
+          className="px-2.5 py-1 text-xs border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">»</button>
         <select value={pageSize} onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-          className="ml-3 px-1.5 py-0.5 text-xs border border-slate-300 rounded bg-white">
-          <option value={5}>5 / Page</option>
-          <option value={10}>10 / Page</option>
-          <option value={25}>25 / Page</option>
-          <option value={50}>50 / Page</option>
+          className="ml-3 px-2.5 py-1 text-xs border border-slate-300 rounded bg-white">
+          <option value={5}>5 / {pageLabel}</option>
+          <option value={10}>10 / {pageLabel}</option>
+          <option value={25}>25 / {pageLabel}</option>
+          <option value={50}>50 / {pageLabel}</option>
         </select>
         <span className="ml-3 text-xs text-slate-500">Total {pageData.totalElements} Data</span>
       </div>
@@ -210,8 +220,8 @@ export function RoleManagement() {
             <div className="p-4">
               {modalMode === 'detail' && selectedRole && (
                 <div className="space-y-3">
-                  <div><label className="text-xs text-slate-500">{(t as any).role_name}</label><p className="text-sm text-slate-900 font-medium mt-0.5">{selectedRole.roleName}</p></div>
-                  <div><label className="text-xs text-slate-500">{(t as any).role_description}</label><p className="text-sm text-slate-900 mt-0.5">{selectedRole.description}</p></div>
+                  <div><label className="text-sm text-slate-500">{(t as any).role_name}</label><p className="text-sm text-slate-900 font-medium mt-0.5">{selectedRole.roleName}</p></div>
+                  <div><label className="text-sm text-slate-500">{(t as any).role_description}</label><p className="text-sm text-slate-900 mt-0.5">{selectedRole.description}</p></div>
                 </div>
               )}
               {(modalMode === 'add' || modalMode === 'edit') && (

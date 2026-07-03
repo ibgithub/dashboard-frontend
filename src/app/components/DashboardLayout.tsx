@@ -221,7 +221,7 @@ export function DashboardLayout() {
                     <div
                       className="ml-5 border-l border-slate-700 pl-2.5 overflow-hidden transition-all duration-300 ease-in-out"
                       style={{
-                        maxHeight: isExpanded ? `${menu.children.length * 36}px` : '0px',
+                        maxHeight: isExpanded ? `${menu.children.length * 34}px` : '0px',
                         opacity: isExpanded ? 1 : 0,
                         marginTop: isExpanded ? '4px' : '0px',
                       }}

@@ -112,6 +112,27 @@ const en = {
   role_prev: 'Previous',
   role_next: 'Next',
 
+  // User Management
+  user_title: 'User Management',
+  user_subtitle: 'List of users registered in the system',
+  user_username: 'Username',
+  user_fullname: 'Full Name',
+  user_email: 'Email',
+  user_phone: 'Phone Number',
+  user_firstname: 'First Name',
+  user_lastname: 'Last Name',
+  user_password: 'Password',
+  user_actions: 'Actions',
+  user_add: 'Add User',
+  user_detail: 'User Detail',
+  user_edit: 'Edit User',
+  user_delete_confirm: 'Are you sure you want to delete this user?',
+  user_loading: 'Loading users...',
+  user_search: 'Search users...',
+  user_save: 'Save',
+  user_cancel: 'Cancel',
+  user_close: 'Close',
+
   // Login
   login_title: 'Login',
   login_subtitle: 'Sign in to ANVAIA Dashboard',

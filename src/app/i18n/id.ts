@@ -112,6 +112,27 @@ const id = {
   role_prev: 'Sebelumnya',
   role_next: 'Selanjutnya',
 
+  // User Management
+  user_title: 'Manajemen Pengguna',
+  user_subtitle: 'Daftar pengguna yang terdaftar dalam sistem',
+  user_username: 'Username',
+  user_fullname: 'Nama Lengkap',
+  user_email: 'Email',
+  user_phone: 'No. Telepon',
+  user_firstname: 'Nama Depan',
+  user_lastname: 'Nama Belakang',
+  user_password: 'Password',
+  user_actions: 'Aksi',
+  user_add: 'Tambah User',
+  user_detail: 'Detail User',
+  user_edit: 'Edit User',
+  user_delete_confirm: 'Yakin ingin menghapus user ini?',
+  user_loading: 'Memuat data user...',
+  user_search: 'Cari user...',
+  user_save: 'Simpan',
+  user_cancel: 'Batal',
+  user_close: 'Tutup',
+
   // Login
   login_title: 'Login',
   login_subtitle: 'Masuk ke Dashboard ANVAIA',

@@ -7,7 +7,9 @@ import { ExecutivePortfolio } from './pages/ExecutivePortfolio';
 import { ClusterMap } from './pages/ClusterMap';
 import { ChurnWatchlist } from './pages/ChurnWatchlist';
 import { RoleManagement } from './pages/RoleManagement';
-import { RoleManagement } from './pages/RoleManagement';
+import { UserManagement } from './pages/UserManagement';
+import { ChangePassword } from './pages/ChangePassword';
+import { Toaster } from './components/ui/sonner';
 
 // Simple auth guard
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -91,10 +93,10 @@ const router = createBrowserRouter([
       { path: 'settings/model-parameters', element: <PlaceholderPage menuKey="menu_m8_1" /> },
       { path: 'settings/batch-processing', element: <PlaceholderPage menuKey="menu_m8_2" /> },
       { path: 'settings/product-config', element: <PlaceholderPage menuKey="menu_m8_3" /> },
-      { path: 'settings/user-management', element: <PlaceholderPage menuKey="menu_m8_4" /> },
+      { path: 'settings/user-management', element: <UserManagement /> },
       { path: 'settings/role-management', element: <RoleManagement /> },
       { path: 'settings/menu-management', element: <PlaceholderPage menuKey="menu_m8_6" /> },
-      { path: 'settings/change-password', element: <PlaceholderPage menuKey="menu_m8_7" /> },
+      { path: 'settings/change-password', element: <ChangePassword /> },
       { path: 'settings/integration-monitoring', element: <PlaceholderPage menuKey="menu_m8_8" /> },
       { path: 'settings/audit-log', element: <PlaceholderPage menuKey="menu_m8_9" /> },
 
@@ -108,6 +110,7 @@ export default function App() {
   return (
     <I18nProvider>
       <RouterProvider router={router} />
+      <Toaster position="top-right" richColors />
     </I18nProvider>
   );
 }
