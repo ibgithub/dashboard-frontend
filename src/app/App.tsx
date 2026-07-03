@@ -9,6 +9,7 @@ import { ChurnWatchlist } from './pages/ChurnWatchlist';
 import { RoleManagement } from './pages/RoleManagement';
 import { UserManagement } from './pages/UserManagement';
 import { ChangePassword } from './pages/ChangePassword';
+import { MenuManagement } from './pages/MenuManagement';
 import { Toaster } from './components/ui/sonner';
 
 // Simple auth guard
@@ -95,7 +96,7 @@ const router = createBrowserRouter([
       { path: 'settings/product-config', element: <PlaceholderPage menuKey="menu_m8_3" /> },
       { path: 'settings/user-management', element: <UserManagement /> },
       { path: 'settings/role-management', element: <RoleManagement /> },
-      { path: 'settings/menu-management', element: <PlaceholderPage menuKey="menu_m8_6" /> },
+      { path: 'settings/menu-management', element: <MenuManagement /> },
       { path: 'settings/change-password', element: <ChangePassword /> },
       { path: 'settings/integration-monitoring', element: <PlaceholderPage menuKey="menu_m8_8" /> },
       { path: 'settings/audit-log', element: <PlaceholderPage menuKey="menu_m8_9" /> },
