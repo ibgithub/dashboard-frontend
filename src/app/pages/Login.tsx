@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
-import { useI18n } from '../i18n';
+import { useI18n, resolveMessage } from '../i18n';
 import { Eye, EyeOff, Lock, User } from 'lucide-react';
 
 export function Login() {
@@ -27,13 +27,20 @@ export function Login() {
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        throw new Error(data?.message || `Login gagal (${res.status})`);
+        const errData = await res.json().catch(() => null);
+        if (errData?.data?.remainingAttempts !== undefined) {
+          const remaining = errData.data.remainingAttempts;
+          const msg = lang === 'id'
+            ? `Password Anda salah, Anda punya ${remaining} kali kesempatan`
+            : `Wrong password, you have ${remaining} attempts remaining`;
+          throw new Error(msg);
+        }
+        throw new Error(resolveMessage(errData?.message || '', lang) || 'Login gagal');
       }
 
       const data = await res.json();
       if (!data.success) {
-        throw new Error(data.message || 'Login gagal');
+        throw new Error(resolveMessage(data.message || '', lang) || 'Login gagal');
       }
       const token = data.data?.token || '';
       if (!token) throw new Error('Token tidak ditemukan');
@@ -66,7 +73,8 @@ export function Login() {
         navigate('/', { replace: true });
       }, 500);
     } catch (err: any) {
-      setError(err.message || 'Terjadi kesalahan saat login');
+      const msg = err.message || 'Error';
+      setError(resolveMessage(msg, lang));
     } finally {
       setLoading(false);
     }

@@ -14,6 +14,7 @@ interface User {
   fullName: string;
   phoneNumber: string;
   appLang: string | null;
+  status: number | null;
   roles?: { id: number; roleName: string }[];
 }
 
@@ -55,6 +56,7 @@ export function UserManagement() {
   const [formEmail, setFormEmail] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [formAppLang, setFormAppLang] = useState('id');
+  const [formStatus, setFormStatus] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formError, setFormError] = useState('');
@@ -117,6 +119,7 @@ export function UserManagement() {
     setFormFirstName(user.firstName); setFormLastName(user.lastName);
     setFormEmail(user.email); setFormPhone(user.phoneNumber || '');
     setFormAppLang(user.appLang || 'id');
+    setFormStatus(user.status || 1);
     setAssignedRoleIds(user.roles?.map(r => r.id) || []);
     setFormError('');
     setModalMode('edit'); setModalOpen(true);
@@ -125,7 +128,7 @@ export function UserManagement() {
     setSelectedUser(null);
     setFormUsername(''); setFormPassword(''); setFormConfirmPassword('');
     setFormFirstName(''); setFormLastName('');
-    setFormEmail(''); setFormPhone(''); setFormAppLang('id');
+    setFormEmail(''); setFormPhone(''); setFormAppLang('id'); setFormStatus(1);
     setAssignedRoleIds([]);
     setFormError('');
     setModalMode('add'); setModalOpen(true);
@@ -174,11 +177,11 @@ export function UserManagement() {
     if (modalMode === 'add') {
       url = '/api/users';
       method = 'POST';
-      body = { username: formUsername, password: formPassword, firstName: formFirstName, lastName: formLastName, email: formEmail, phoneNumber: formPhone, appLang: formAppLang, roleIds: assignedRoleIds };
+      body = { username: formUsername, password: formPassword, firstName: formFirstName, lastName: formLastName, email: formEmail, phoneNumber: formPhone, appLang: formAppLang, status: formStatus, roleIds: assignedRoleIds };
     } else {
       url = `/api/users/${selectedUser?.id}`;
       method = 'PUT';
-      body = { firstName: formFirstName, lastName: formLastName, email: formEmail, phoneNumber: formPhone, appLang: formAppLang, roleIds: assignedRoleIds };
+      body = { firstName: formFirstName, lastName: formLastName, email: formEmail, phoneNumber: formPhone, appLang: formAppLang, status: formStatus, roleIds: assignedRoleIds };
     }
     try {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }, body: JSON.stringify(body) });
@@ -331,6 +334,8 @@ export function UserManagement() {
                     <div><label className="text-sm text-slate-500">{(t as any).user_email}</label><p className="text-sm text-slate-900 mt-0.5">{selectedUser.email}</p></div>
                     <div><label className="text-sm text-slate-500">{(t as any).user_phone}</label><p className="text-sm text-slate-900 mt-0.5">{selectedUser.phoneNumber || '-'}</p></div>
                     <div><label className="text-sm text-slate-500">{(t as any).lang === 'id' ? 'Bahasa Aplikasi' : 'App Language'}</label><p className="text-sm text-slate-900 mt-0.5">{selectedUser.appLang === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia'}</p></div>
+                    <div><label className="text-sm text-slate-500">Status</label><p className="text-sm mt-0.5">{selectedUser.status === 2 ? <span className="text-red-600 font-medium">Blocked</span> : <span className="text-green-600 font-medium">Active</span>}</p></div>
+                    <div><label className="text-sm text-slate-500">Status</label><p className="text-sm mt-0.5">{selectedUser.status === 2 ? <span className="text-red-600 font-medium">Blocked</span> : <span className="text-green-600 font-medium">Active</span>}</p></div>
                   </div>
                   {/* Roles */}
                   <div>
@@ -451,6 +456,14 @@ export function UserManagement() {
                               className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white">
                               <option value="id">🇮🇩 Indonesia</option>
                               <option value="en">🇬🇧 English</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-slate-700 mb-1">Status</label>
+                            <select value={formStatus} onChange={(e) => setFormStatus(Number(e.target.value))}
+                              className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white">
+                              <option value={1}>Active</option>
+                              <option value={2}>Blocked</option>
                             </select>
                           </div>
                         </>
