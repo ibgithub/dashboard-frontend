@@ -103,7 +103,7 @@ const router = createBrowserRouter([
       { path: 'settings/integration-monitoring', element: <PlaceholderPage menuKey="menu_m8_8" /> },
       { path: 'settings/audit-log', element: <PlaceholderPage menuKey="menu_m8_9" /> },
       { path: 'settings/edit-profile', element: <EditProfile /> },
-      { path: 'settings/system-parameter', element: <SystemParameter /> },
+      { path: 'settings/system-parameters', element: <SystemParameter /> },
 
       // Catch-all
       { path: '*', element: <Navigate to="/executive/portfolio" replace /> },
