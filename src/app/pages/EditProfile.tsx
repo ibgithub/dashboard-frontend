@@ -2,11 +2,11 @@
 // Endpoint: GET /api/users/{id}, PUT /api/users/{id}
 
 import { useState, useEffect } from 'react';
-import { useI18n } from '../i18n';
+import { useI18n, resolveMessage } from '../i18n';
 import { toast } from 'sonner';
 
 export function EditProfile() {
-  const { t, setLang } = useI18n();
+  const { t, lang, setLang } = useI18n();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -48,10 +48,10 @@ export function EditProfile() {
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(json.message || 'Profil berhasil diperbarui');
+        toast.success(resolveMessage(json.message, lang));
         // Update bahasa UI sesuai pilihan
         setLang(appLang as 'id' | 'en');
-      } else toast.error(json.message || 'Gagal menyimpan');
+      } else toast.error(resolveMessage(json.message, lang));
     } catch (err: any) { toast.error(err.message || 'Error'); }
     finally { setSaving(false); }
   }

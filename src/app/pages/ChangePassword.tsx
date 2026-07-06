@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { Eye, EyeOff, Lock } from 'lucide-react';
-import { useI18n } from '../i18n';
+import { useI18n, resolveMessage } from '../i18n';
 import { toast } from 'sonner';
 
 export function ChangePassword() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -40,7 +40,7 @@ export function ChangePassword() {
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(json.message || 'Password berhasil diubah');
+        toast.success(resolveMessage(json.message, lang));
         setOldPassword(''); setNewPassword(''); setConfirmPassword('');
       } else {
         setError(json.message || 'Gagal mengubah password');

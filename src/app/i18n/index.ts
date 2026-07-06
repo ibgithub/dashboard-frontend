@@ -40,3 +40,6 @@ export const I18nContext = createContext<I18nContextType>({
 export function useI18n() {
   return useContext(I18nContext);
 }
+
+// Re-export resolveMessage for convenience
+export { resolveMessage } from './messages';

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Eye, Pencil, Trash2, Plus, X, Search, EyeOff, KeyRound } from 'lucide-react';
-import { useI18n } from '../i18n';
+import { useI18n, resolveMessage } from '../i18n';
 import { toast } from 'sonner';
 
 interface User {
@@ -34,7 +34,7 @@ interface PageData {
 type ModalMode = 'detail' | 'add' | 'edit' | 'resetpw' | null;
 
 export function UserManagement() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [pageData, setPageData] = useState<PageData>({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -149,7 +149,7 @@ export function UserManagement() {
         body: JSON.stringify({ newPassword: resetNewPw, confirmPassword: resetConfirmPw }),
       });
       const json = await res.json();
-      if (json.success) { toast.success(json.message || 'Password berhasil diubah'); closeModal(); }
+      if (json.success) { toast.success(resolveMessage(json.message, lang)); closeModal(); }
       else setFormError(json.message || 'Gagal mengubah password');
     } catch (err: any) { setFormError(err.message || 'Error'); }
   }
@@ -183,7 +183,7 @@ export function UserManagement() {
     try {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }, body: JSON.stringify(body) });
       const json = await res.json();
-      if (json.success) { toast.success(json.message || 'Berhasil'); closeModal(); fetchUsers(currentPage, pageSize, keyword); }
+      if (json.success) { toast.success(resolveMessage(json.message, lang)); closeModal(); fetchUsers(currentPage, pageSize, keyword); }
       else setFormError(json.message || 'Gagal menyimpan');
     } catch (err: any) { setFormError(err.message || 'Error'); }
   }
@@ -193,8 +193,8 @@ export function UserManagement() {
     try {
       const res = await fetch(`/api/users/${user.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getToken()}` } });
       const json = await res.json();
-      if (json.success) { toast.success(json.message || 'User berhasil dihapus'); fetchUsers(currentPage, pageSize, keyword); }
-      else toast.error(json.message || 'Gagal menghapus');
+      if (json.success) { toast.success(resolveMessage(json.message, lang)); fetchUsers(currentPage, pageSize, keyword); }
+      else toast.error(resolveMessage(json.message, lang));
     } catch (err: any) { toast.error(err.message || 'Error'); }
   }
 

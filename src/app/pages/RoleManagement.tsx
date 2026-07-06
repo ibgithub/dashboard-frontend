@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Eye, Pencil, Trash2, Plus, X, Search } from 'lucide-react';
-import { useI18n } from '../i18n';
+import { useI18n, resolveMessage } from '../i18n';
 import { toast } from 'sonner';
 
 interface MenuRef {
@@ -34,7 +34,7 @@ interface PageData {
 type ModalMode = 'detail' | 'add' | 'edit' | null;
 
 export function RoleManagement() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [pageData, setPageData] = useState<PageData>({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -146,8 +146,8 @@ export function RoleManagement() {
     try {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }, body: JSON.stringify(body) });
       const json = await res.json();
-      if (json.success) { toast.success(json.message || 'Berhasil'); closeModal(); fetchRoles(currentPage, pageSize, keyword); }
-      else toast.error(json.message || 'Gagal menyimpan');
+      if (json.success) { toast.success(resolveMessage(json.message, lang)); closeModal(); fetchRoles(currentPage, pageSize, keyword); }
+      else toast.error(resolveMessage(json.message, lang));
     } catch (err: any) { toast.error(err.message || 'Error'); }
   }
 
@@ -156,8 +156,8 @@ export function RoleManagement() {
     try {
       const res = await fetch(`/api/roles/${role.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getToken()}` } });
       const json = await res.json();
-      if (json.success) { toast.success(json.message || 'Role berhasil dihapus'); fetchRoles(currentPage, pageSize, keyword); }
-      else toast.error(json.message || 'Gagal menghapus');
+      if (json.success) { toast.success(resolveMessage(json.message, lang)); fetchRoles(currentPage, pageSize, keyword); }
+      else toast.error(resolveMessage(json.message, lang));
     } catch (err: any) { toast.error(err.message || 'Error'); }
   }
 
