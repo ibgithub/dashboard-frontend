@@ -88,6 +88,8 @@ const en = {
   menu_m8_7: 'Change Password',
   menu_m8_8: 'System Integration & Monitoring',
   menu_m8_9: 'System Audit Log',
+  menu_m8_10: 'Edit Profile',
+  menu_m8_11: 'System Parameter',
 
   // Role Management
   role_title: 'Role Management',

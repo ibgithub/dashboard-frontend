@@ -10,6 +10,8 @@ import { RoleManagement } from './pages/RoleManagement';
 import { UserManagement } from './pages/UserManagement';
 import { ChangePassword } from './pages/ChangePassword';
 import { MenuManagement } from './pages/MenuManagement';
+import { EditProfile } from './pages/EditProfile';
+import { SystemParameter } from './pages/SystemParameter';
 import { Toaster } from './components/ui/sonner';
 
 // Simple auth guard
@@ -100,6 +102,8 @@ const router = createBrowserRouter([
       { path: 'settings/change-password', element: <ChangePassword /> },
       { path: 'settings/integration-monitoring', element: <PlaceholderPage menuKey="menu_m8_8" /> },
       { path: 'settings/audit-log', element: <PlaceholderPage menuKey="menu_m8_9" /> },
+      { path: 'settings/edit-profile', element: <EditProfile /> },
+      { path: 'settings/system-parameter', element: <SystemParameter /> },
 
       // Catch-all
       { path: '*', element: <Navigate to="/executive/portfolio" replace /> },

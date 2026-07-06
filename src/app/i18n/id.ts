@@ -88,6 +88,8 @@ const id = {
   menu_m8_7: 'Ganti Password',
   menu_m8_8: 'Integrasi Sistem & Monitoring',
   menu_m8_9: 'Audit Log Sistem',
+  menu_m8_10: 'Edit Profil',
+  menu_m8_11: 'Parameter Sistem',
 
   // Role Management
   role_title: 'Manajemen Role',

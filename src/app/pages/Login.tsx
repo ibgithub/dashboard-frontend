@@ -40,6 +40,15 @@ export function Login() {
       localStorage.setItem('auth_token', token);
       localStorage.setItem('auth_user', username);
 
+      // Decode JWT to get appLang
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.appLang) {
+          const lang = payload.appLang.toLowerCase() as 'id' | 'en';
+          setLang(lang);
+        }
+      } catch (e) {}
+
       // Step 2: Fetch menu permissions
       const menuRes = await fetch('/api/users/me/menus', {
         headers: { 'Authorization': `Bearer ${token}` },

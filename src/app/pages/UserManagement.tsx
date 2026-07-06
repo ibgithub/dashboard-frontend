@@ -13,6 +13,7 @@ interface User {
   lastName: string;
   fullName: string;
   phoneNumber: string;
+  appLang: string | null;
   roles?: { id: number; roleName: string }[];
 }
 
@@ -53,6 +54,7 @@ export function UserManagement() {
   const [formLastName, setFormLastName] = useState('');
   const [formEmail, setFormEmail] = useState('');
   const [formPhone, setFormPhone] = useState('');
+  const [formAppLang, setFormAppLang] = useState('id');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formError, setFormError] = useState('');
@@ -114,6 +116,7 @@ export function UserManagement() {
     setFormUsername(user.username); setFormPassword(''); setFormConfirmPassword('');
     setFormFirstName(user.firstName); setFormLastName(user.lastName);
     setFormEmail(user.email); setFormPhone(user.phoneNumber || '');
+    setFormAppLang(user.appLang || 'id');
     setAssignedRoleIds(user.roles?.map(r => r.id) || []);
     setFormError('');
     setModalMode('edit'); setModalOpen(true);
@@ -122,7 +125,7 @@ export function UserManagement() {
     setSelectedUser(null);
     setFormUsername(''); setFormPassword(''); setFormConfirmPassword('');
     setFormFirstName(''); setFormLastName('');
-    setFormEmail(''); setFormPhone('');
+    setFormEmail(''); setFormPhone(''); setFormAppLang('id');
     setAssignedRoleIds([]);
     setFormError('');
     setModalMode('add'); setModalOpen(true);
@@ -171,11 +174,11 @@ export function UserManagement() {
     if (modalMode === 'add') {
       url = '/api/users';
       method = 'POST';
-      body = { username: formUsername, password: formPassword, firstName: formFirstName, lastName: formLastName, email: formEmail, phoneNumber: formPhone, roleIds: assignedRoleIds };
+      body = { username: formUsername, password: formPassword, firstName: formFirstName, lastName: formLastName, email: formEmail, phoneNumber: formPhone, appLang: formAppLang, roleIds: assignedRoleIds };
     } else {
       url = `/api/users/${selectedUser?.id}`;
       method = 'PUT';
-      body = { firstName: formFirstName, lastName: formLastName, email: formEmail, phoneNumber: formPhone, roleIds: assignedRoleIds };
+      body = { firstName: formFirstName, lastName: formLastName, email: formEmail, phoneNumber: formPhone, appLang: formAppLang, roleIds: assignedRoleIds };
     }
     try {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }, body: JSON.stringify(body) });
@@ -327,6 +330,7 @@ export function UserManagement() {
                     <div><label className="text-sm text-slate-500">{(t as any).user_fullname}</label><p className="text-sm text-slate-900 mt-0.5">{selectedUser.fullName}</p></div>
                     <div><label className="text-sm text-slate-500">{(t as any).user_email}</label><p className="text-sm text-slate-900 mt-0.5">{selectedUser.email}</p></div>
                     <div><label className="text-sm text-slate-500">{(t as any).user_phone}</label><p className="text-sm text-slate-900 mt-0.5">{selectedUser.phoneNumber || '-'}</p></div>
+                    <div><label className="text-sm text-slate-500">{(t as any).lang === 'id' ? 'Bahasa Aplikasi' : 'App Language'}</label><p className="text-sm text-slate-900 mt-0.5">{selectedUser.appLang === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia'}</p></div>
                   </div>
                   {/* Roles */}
                   <div>
@@ -419,6 +423,14 @@ export function UserManagement() {
                             <input type="text" value={formPhone} onChange={(e) => setFormPhone(e.target.value)}
                               className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white" />
                           </div>
+                          <div>
+                            <label className="block text-xs font-medium text-slate-700 mb-1">{(t as any).lang === 'id' ? 'Bahasa Aplikasi' : 'App Language'}</label>
+                            <select value={formAppLang} onChange={(e) => setFormAppLang(e.target.value)}
+                              className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white">
+                              <option value="id">🇮🇩 Indonesia</option>
+                              <option value="en">🇬🇧 English</option>
+                            </select>
+                          </div>
                         </>
                       )}
                       {modalMode === 'edit' && (
@@ -432,6 +444,14 @@ export function UserManagement() {
                             <label className="block text-xs font-medium text-slate-700 mb-1">{(t as any).user_phone}</label>
                             <input type="text" value={formPhone} onChange={(e) => setFormPhone(e.target.value)}
                               className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-slate-700 mb-1">{(t as any).lang === 'id' ? 'Bahasa Aplikasi' : 'App Language'}</label>
+                            <select value={formAppLang} onChange={(e) => setFormAppLang(e.target.value)}
+                              className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white">
+                              <option value="id">🇮🇩 Indonesia</option>
+                              <option value="en">🇬🇧 English</option>
+                            </select>
                           </div>
                         </>
                       )}
