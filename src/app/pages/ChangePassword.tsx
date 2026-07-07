@@ -68,8 +68,8 @@ export function ChangePassword() {
       </div>
 
       {/* Form */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 flex-1 flex items-center justify-center">
-        <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-sm">
+      <div className="bg-white border border-slate-200 rounded-xl p-6 max-w-md">
+        <form onSubmit={handleSubmit} className="space-y-4 w-full">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-xs">{error}</div>
           )}

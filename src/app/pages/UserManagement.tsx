@@ -335,7 +335,6 @@ export function UserManagement() {
                     <div><label className="text-sm text-slate-500">{(t as any).user_phone}</label><p className="text-sm text-slate-900 mt-0.5">{selectedUser.phoneNumber || '-'}</p></div>
                     <div><label className="text-sm text-slate-500">{(t as any).lang === 'id' ? 'Bahasa Aplikasi' : 'App Language'}</label><p className="text-sm text-slate-900 mt-0.5">{selectedUser.appLang === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia'}</p></div>
                     <div><label className="text-sm text-slate-500">Status</label><p className="text-sm mt-0.5">{selectedUser.status === 2 ? <span className="text-red-600 font-medium">Blocked</span> : <span className="text-green-600 font-medium">Active</span>}</p></div>
-                    <div><label className="text-sm text-slate-500">Status</label><p className="text-sm mt-0.5">{selectedUser.status === 2 ? <span className="text-red-600 font-medium">Blocked</span> : <span className="text-green-600 font-medium">Active</span>}</p></div>
                   </div>
                   {/* Roles */}
                   <div>
@@ -441,8 +440,18 @@ export function UserManagement() {
                       {modalMode === 'edit' && (
                         <>
                           <div>
+                            <label className="block text-xs font-medium text-slate-700 mb-1">{(t as any).user_firstname}</label>
+                            <input type="text" value={formFirstName} onChange={(e) => setFormFirstName(e.target.value)}
+                              className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white" />
+                          </div>
+                          <div>
                             <label className="block text-xs font-medium text-slate-700 mb-1">{(t as any).user_email}</label>
                             <input type="email" value={formEmail} onChange={(e) => setFormEmail(e.target.value)}
+                              className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-slate-700 mb-1">{(t as any).user_lastname}</label>
+                            <input type="text" value={formLastName} onChange={(e) => setFormLastName(e.target.value)}
                               className="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white" />
                           </div>
                           <div>

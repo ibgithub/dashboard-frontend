@@ -13,15 +13,24 @@ interface Setting {
   description: string;
 }
 
+interface PageData {
+  content: Setting[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 type ModalMode = 'detail' | 'add' | 'edit' | null;
 
 export function SystemParameter() {
   const { t, lang } = useI18n();
-  const [settings, setSettings] = useState<Setting[]>([]);
-  const [filtered, setFiltered] = useState<Setting[]>([]);
+  const [pageData, setPageData] = useState<PageData>({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [keyword, setKeyword] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>(null);
@@ -41,37 +50,37 @@ export function SystemParameter() {
   const btnSave = (t as any).lang === 'id' ? 'Simpan' : 'Save';
   const btnCancel = (t as any).lang === 'id' ? 'Batal' : 'Cancel';
   const btnClose = (t as any).lang === 'id' ? 'Tutup' : 'Close';
+  const pageLabel = (t as any).lang === 'id' ? 'Halaman' : 'Page';
   const confirmDelete = (t as any).lang === 'id' ? 'Yakin ingin menghapus parameter ini?' : 'Are you sure you want to delete this parameter?';
 
-  async function fetchSettings() {
+  async function fetchSettings(page = 0, size = 10, search = '') {
     setLoading(true);
     try {
-      const res = await fetch('/api/settings', { headers: { 'Authorization': `Bearer ${getToken()}` } });
+      let url = `/api/settings?page=${page}&size=${size}`;
+      if (search) url += `&keyword=${encodeURIComponent(search)}`;
+      const res = await fetch(url, { headers: { 'Authorization': `Bearer ${getToken()}` } });
       if (res.status === 403 || res.status === 401) { setError('Access denied'); return; }
       const json = await res.json();
-      if (json.success) {
-        const data = json.data || [];
-        setSettings(data);
-        setFiltered(data);
-        setError('');
-      } else setError(json.message || 'Error');
+      if (json.success) { setPageData(json.data); setError(''); }
+      else setError(json.message || 'Error');
     } catch (err: any) { setError(err.message || 'Error'); }
     finally { setLoading(false); }
   }
 
-  useEffect(() => { fetchSettings(); }, []);
+  useEffect(() => { fetchSettings(currentPage, pageSize, keyword); }, [currentPage, pageSize]);
 
-  function handleSearch() {
-    if (!keyword.trim()) { setFiltered(settings); return; }
-    const kw = keyword.toLowerCase();
-    setFiltered(settings.filter(s =>
-      s.name.toLowerCase().includes(kw) ||
-      s.value.toLowerCase().includes(kw) ||
-      s.description.toLowerCase().includes(kw)
-    ));
-  }
-
+  function handleSearch() { setCurrentPage(0); fetchSettings(0, pageSize, keyword); }
   function handleKeyDown(e: React.KeyboardEvent) { if (e.key === 'Enter') handleSearch(); }
+  function handlePageSizeChange(newSize: number) { setPageSize(newSize); setCurrentPage(0); }
+
+  function getPageNumbers(): number[] {
+    const total = pageData.totalPages;
+    if (total <= 5) return Array.from({ length: total }, (_, i) => i);
+    let start = Math.max(0, currentPage - 2);
+    let end = start + 5;
+    if (end > total) { end = total; start = end - 5; }
+    return Array.from({ length: end - start }, (_, i) => start + i);
+  }
 
   function openDetail(s: Setting) { setSelectedSetting(s); setModalMode('detail'); setModalOpen(true); }
   function openEdit(s: Setting) {
@@ -93,7 +102,7 @@ export function SystemParameter() {
     try {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }, body: JSON.stringify(body) });
       const json = await res.json();
-      if (json.success) { toast.success(resolveMessage(json.message, lang)); closeModal(); fetchSettings(); }
+      if (json.success) { toast.success(resolveMessage(json.message, lang)); closeModal(); fetchSettings(currentPage, pageSize, keyword); }
       else toast.error(resolveMessage(json.message, lang));
     } catch (err: any) { toast.error(err.message || 'Error'); }
   }
@@ -103,7 +112,7 @@ export function SystemParameter() {
     try {
       const res = await fetch(`/api/settings/${s.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getToken()}` } });
       const json = await res.json();
-      if (json.success) { toast.success(resolveMessage(json.message, lang)); fetchSettings(); }
+      if (json.success) { toast.success(resolveMessage(json.message, lang)); fetchSettings(currentPage, pageSize, keyword); }
       else toast.error(resolveMessage(json.message, lang));
     } catch (err: any) { toast.error(err.message || 'Error'); }
   }
@@ -150,10 +159,10 @@ export function SystemParameter() {
           <tbody>
             {loading ? (
               <tr><td colSpan={4} className="py-6 text-center text-slate-400 text-xs">Loading...</td></tr>
-            ) : filtered.length === 0 ? (
+            ) : pageData.content.length === 0 ? (
               <tr><td colSpan={4} className="py-6 text-center text-slate-400 text-xs">No data</td></tr>
             ) : (
-              filtered.map((s) => (
+              pageData.content.map((s) => (
                 <tr key={s.id} className="border-b border-slate-100 hover:bg-blue-50/40">
                   <td className="py-2 px-4 text-slate-800 font-medium">{s.name}</td>
                   <td className="py-2 px-4 text-slate-700">{s.value}</td>
@@ -176,6 +185,27 @@ export function SystemParameter() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Paging */}
+      <div className="flex items-center mt-4 gap-2">
+        <button onClick={() => setCurrentPage(Math.max(0, currentPage - 1))} disabled={currentPage === 0}
+          className="px-2.5 py-1 text-xs border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">«</button>
+        {getPageNumbers().map((page) => (
+          <button key={page} onClick={() => setCurrentPage(page)}
+            className={`px-3 py-1 text-xs rounded transition ${page === currentPage ? 'bg-slate-700 text-white' : 'border border-slate-300 hover:bg-slate-50 text-slate-600'}`}
+          >{page + 1}</button>
+        ))}
+        <button onClick={() => setCurrentPage(Math.min(pageData.totalPages - 1, currentPage + 1))} disabled={currentPage >= pageData.totalPages - 1}
+          className="px-2.5 py-1 text-xs border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">»</button>
+        <select value={pageSize} onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+          className="ml-3 px-1.5 py-1 text-xs border border-slate-300 rounded bg-white">
+          <option value={5}>5 / {pageLabel}</option>
+          <option value={10}>10 / {pageLabel}</option>
+          <option value={25}>25 / {pageLabel}</option>
+          <option value={50}>50 / {pageLabel}</option>
+        </select>
+        <span className="ml-3 text-xs text-slate-500">Total {pageData.totalElements} Data</span>
       </div>
 
       {/* Footer */}
