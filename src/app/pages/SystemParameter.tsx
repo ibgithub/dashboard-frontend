@@ -61,8 +61,16 @@ export function SystemParameter() {
       const res = await fetch(url, { headers: { 'Authorization': `Bearer ${getToken()}` } });
       if (res.status === 403 || res.status === 401) { setError('Access denied'); return; }
       const json = await res.json();
-      if (json.success) { setPageData(json.data); setError(''); }
-      else setError(json.message || 'Error');
+      if (json.success) {
+        const data = json.data;
+        // Handle both paged and array response
+        if (Array.isArray(data)) {
+          setPageData({ content: data, page: 0, size: data.length, totalElements: data.length, totalPages: 1 });
+        } else {
+          setPageData(data);
+        }
+        setError('');
+      } else setError(json.message || 'Error');
     } catch (err: any) { setError(err.message || 'Error'); }
     finally { setLoading(false); }
   }
